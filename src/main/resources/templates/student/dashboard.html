@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="dashboard-body">
+    <div th:replace="~{fragments/navbar :: navbar('Student Dashboard')}"></div>
+    <main class="dashboard-content">
+        <div class="page-header">
+            <div>
+                <h1>Your exams</h1>
+                <p>Everything scheduled for your class — live exams can be started right away.</p>
+            </div>
+        </div>
+
+        <div th:if="${noClass}" class="empty-state">
+            <div class="empty-glyph mono">!</div>
+            <strong>No class assigned yet</strong>
+            <p>Ask your admin to assign you to a class — your exams will appear here once you're in one.</p>
+        </div>
+
+        <div th:unless="${noClass}">
+            <div th:if="${#lists.isEmpty(exams)}" class="empty-state">
+                <div class="empty-glyph mono">—</div>
+                <strong>No exams scheduled yet</strong>
+                <p>Your teacher hasn't scheduled an exam for your class. Check back soon.</p>
+            </div>
+
+            <table th:unless="${#lists.isEmpty(exams)}">
+                <thead><tr><th>Subject</th><th>Questions</th><th>Timer</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                    <tr th:each="e : ${exams}">
+                        <td data-label="Subject" th:text="${e.subject.name}"></td>
+                        <td data-label="Questions" class="mono" th:text="${e.questionCount}"></td>
+                        <td data-label="Timer" class="mono" th:text="${e.timerMinutes} + ' min'"></td>
+                        <td data-label="Status">
+                            <span th:if="${e.status == 'NOT_STARTED'}" class="status-badge status-not-started"><i class="dot"></i>Not started</span>
+                            <span th:if="${e.status == 'LIVE'}" class="status-badge status-live"><i class="dot pulse"></i>Live</span>
+                            <span th:if="${e.status == 'ENDED'}" class="status-badge status-ended"><i class="dot"></i>Ended</span>
+                        </td>
+                        <td data-label="">
+                            <a th:if="${e.status == 'LIVE' and (attempts[e.id] == null or attempts[e.id].submittedAt == null)}"
+                               th:href="@{/student/exams/{id}/attempt(id=${e.id})}" class="admin-nav-link">
+                               <span th:if="${attempts[e.id] != null}">Resume Exam</span>
+                               <span th:unless="${attempts[e.id] != null}">Start Exam</span>
+                            </a>
+                            <span th:if="${attempts[e.id] != null and attempts[e.id].submittedAt != null}" class="mono"
+                                  th:text="'Score: ' + ${attempts[e.id].score} + '/' + ${e.questionCount}"></span>
+                            <span th:if="${e.status == 'ENDED' and attempts[e.id] == null}" class="status-badge status-muted">Missed</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

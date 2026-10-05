@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Exam Results</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="dashboard-body">
+    <div th:replace="~{fragments/navbar :: navbar('Exam Results')}"></div>
+    <main class="dashboard-content">
+        <div class="page-header">
+            <div>
+                <h1 th:text="${exam.subject.name}">Subject</h1>
+                <p><span class="mono" th:text="${exam.questionCount}"></span> questions, <span class="mono" th:text="${exam.timerMinutes}"></span> min timer.</p>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(attempts) and #lists.isEmpty(absentees)}" class="empty-state">
+            <div class="empty-glyph mono">—</div>
+            <strong>No students in this class yet</strong>
+            <p>Results will appear here once students are assigned to this class.</p>
+        </div>
+
+        <table th:unless="${#lists.isEmpty(attempts) and #lists.isEmpty(absentees)}">
+            <thead><tr><th>Rank</th><th>Student</th><th>Score</th></tr></thead>
+            <tbody>
+                <tr th:each="a, iter : ${attempts}">
+                    <td data-label="Rank" class="mono" th:text="${iter.count}"></td>
+                    <td data-label="Student" th:text="${a.student.name}"></td>
+                    <td data-label="Score" class="mono" th:text="${a.score} + '/' + ${exam.questionCount}"></td>
+                </tr>
+                <tr th:each="s : ${absentees}">
+                    <td data-label="Rank">—</td>
+                    <td data-label="Student" th:text="${s.name}"></td>
+                    <td data-label="Score"><span class="status-badge status-absent">Absent</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

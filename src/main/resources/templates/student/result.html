@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Exam Result</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="dashboard-body">
+    <div th:replace="~{fragments/navbar :: navbar('Exam Result')}"></div>
+    <main class="dashboard-content" style="max-width:640px;">
+
+        <div th:if="${attempt != null and attempt.submittedAt != null}"
+             class="report-card"
+             th:with="pct=${#numbers.formatDecimal((attempt.score * 100.0) / attempt.exam.questionCount, 1, 0)}"
+             th:style="'--pct:' + ${pct} + ';'">
+            <div class="report-ring"><span class="report-pct" th:text="${pct} + '%'"></span></div>
+            <h2 th:text="${attempt.exam.subject.name}">Subject</h2>
+            <p class="report-score" th:text="'Score: ' + ${attempt.score} + ' / ' + ${attempt.exam.questionCount}"></p>
+        </div>
+
+        <div th:if="${attempt == null}" class="empty-state">
+            <div class="empty-glyph mono">—</div>
+            <strong>No attempt on record</strong>
+            <p>You haven't attempted this exam.</p>
+        </div>
+
+        <div th:if="${attempt != null and attempt.submittedAt == null}" class="empty-state">
+            <div class="empty-glyph mono">…</div>
+            <strong>Not submitted yet</strong>
+            <p>This attempt is still in progress.</p>
+        </div>
+
+        <div style="text-align:center;">
+            <a th:href="@{/student}" class="admin-nav-link">Back to Dashboard</a>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="dashboard-body">
+    <div th:replace="~{fragments/navbar :: navbar('Admin Dashboard')}"></div>
+    <main class="dashboard-content">
+        <div class="page-header">
+            <div>
+                <h1>Overview</h1>
+                <p>Everything running across your institution right now.</p>
+            </div>
+        </div>
+
+        <div class="stat-cards">
+            <div class="stat-card"><span class="mono" th:text="${classCount}">0</span><label>Classes</label></div>
+            <div class="stat-card"><span class="mono" th:text="${subjectCount}">0</span><label>Subjects</label></div>
+            <div class="stat-card"><span class="mono" th:text="${userCount}">0</span><label>Users</label></div>
+        </div>
+
+        <nav class="admin-nav">
+            <a th:href="@{/admin/classes}">Manage Classes</a>
+            <a th:href="@{/admin/subjects}">Manage Subjects</a>
+            <a th:href="@{/admin/users}">Manage Users</a>
+        </nav>
+    </main>
+</body>
+</html>

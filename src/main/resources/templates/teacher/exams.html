@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Exams</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="dashboard-body">
+    <div th:replace="~{fragments/navbar :: navbar('Exams')}"></div>
+    <main class="dashboard-content">
+        <div class="page-header">
+            <div>
+                <h1>Exams</h1>
+                <p>Pick the chapters to draw from, set the size and timer, then start it when your class is ready.</p>
+            </div>
+        </div>
+
+        <p th:if="${error}" class="error-msg" th:text="${error}"></p>
+        <p th:if="${param.created != null}" class="success-msg">Exam created successfully.</p>
+
+        <form th:action="@{/teacher/subjects/{id}/exams(id=${subjectId})}" method="post" class="question-form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <label>Chapters to draw questions from</label>
+            <div th:each="c : ${chapters}" class="checkbox-row">
+                <input type="checkbox" name="chapterIds" th:value="${c.id}" th:id="'ch' + ${c.id}">
+                <label th:for="'ch' + ${c.id}" th:text="${c.name}"></label>
+            </div>
+            <label>Number of questions</label>
+            <input type="number" name="questionCount" min="1" required>
+            <label>Time limit (minutes)</label>
+            <input type="number" name="timerMinutes" min="1" required>
+            <button type="submit">Create Exam</button>
+        </form>
+
+        <div th:if="${#lists.isEmpty(exams)}" class="empty-state">
+            <div class="empty-glyph mono">—</div>
+            <strong>No exams yet</strong>
+            <p>Create one above once your chapters have enough questions in them.</p>
+        </div>
+
+        <table th:unless="${#lists.isEmpty(exams)}">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Questions</th>
+                    <th>Timer</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="e : ${exams}">
+                    <td data-label="ID" class="mono" th:text="${e.id}"></td>
+                    <td data-label="Questions" class="mono" th:text="${e.questionCount}"></td>
+                    <td data-label="Timer" class="mono" th:text="${e.timerMinutes} + ' min'"></td>
+                    <td data-label="Status">
+                        <span th:if="${e.status == 'NOT_STARTED'}" class="status-badge status-not-started"><i class="dot"></i>Not started</span>
+                        <span th:if="${e.status == 'LIVE'}" class="status-badge status-live"><i class="dot pulse"></i>Live — ends <span class="mono" th:text="${#temporals.format(e.deadline, 'HH:mm')}"></span></span>
+                        <span th:if="${e.status == 'ENDED'}" class="status-badge status-ended"><i class="dot"></i>Ended</span>
+                    </td>
+                    <td data-label="">
+                        <form th:if="${e.status == 'NOT_STARTED'}" th:action="@{/teacher/exams/{id}/start(id=${e.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <input type="hidden" name="subjectId" th:value="${subjectId}"/>
+                            <button type="submit" class="approve-btn">Start Exam</button>
+                        </form>
+                        <a th:if="${e.status == 'ENDED'}" th:href="@{/teacher/exams/{id}/results(id=${e.id})}" class="admin-nav-link">View Results</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

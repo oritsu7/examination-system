@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Log In — Exam System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="auth-shell">
+        <aside class="auth-brand">
+            <div class="auth-brand-mark"><span class="mark">EX</span> Exam System</div>
+            <div class="auth-brand-copy">
+                <h1>Exams, scheduled and scored without the spreadsheet chaos.</h1>
+                <p>Teachers build question banks and timed exams by chapter. Students get a clean dashboard of what's live, what's coming, and what they scored.</p>
+            </div>
+            <div class="auth-brand-stats">
+                <div><span class="mono">MCQ</span><label>Question format</label></div>
+                <div><span class="mono">Timed</span><label>Auto-submitting exams</label></div>
+                <div><span class="mono">Developer</span><label>Ansh Vardhan Yadav</label></div>
+            </div>
+        </aside>
+        <div class="auth-panel">
+            <div class="auth-card">
+                <h1>Welcome back</h1>
+                <p class="auth-lede">Log in to continue.</p>
+                <p th:if="${param.registered}" class="success-msg">Account created — log in below.</p>
+                <p th:if="${param.error}" class="error-msg">Invalid email or password.</p>
+
+                <form th:action="@{/login}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <label>Email</label>
+                    <input type="email" name="username" required autofocus>
+                    <label>Password</label>
+                    <input type="password" name="password" required>
+                    <button type="submit">Log In</button>
+                </form>
+                <p class="switch-link">No account? <a th:href="@{/signup}">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Taking Exam</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="dashboard-body">
+    <nav class="exam-topbar">
+        <span class="navbar-title" th:text="${exam.subject.name} + ' — Exam'">Exam</span>
+        <span id="timer" class="timer-badge mono" th:attr="data-deadline=${exam.deadline}">--:--</span>
+    </nav>
+
+    <div class="exam-shell">
+        <form id="examForm" class="exam-main" th:action="@{/student/exams/{id}/attempt(id=${exam.id})}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <div th:each="q, iter : ${questions}" class="exam-question qcard" th:id="'q-' + ${iter.count}" th:style="${!iter.first} ? 'display:none;' : ''">
+                <p class="exam-question-text">
+                    <span class="exam-question-number" th:text="${iter.count}"></span>
+                    <span th:text="${q.text}"></span>
+                </p>
+                <div class="exam-options">
+                    <label class="option-label">
+                        <input type="radio" th:name="'answer_' + ${q.id}" value="1" required>
+                        <span th:text="${q.option1}"></span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" th:name="'answer_' + ${q.id}" value="2">
+                        <span th:text="${q.option2}"></span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" th:name="'answer_' + ${q.id}" value="3">
+                        <span th:text="${q.option3}"></span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" th:name="'answer_' + ${q.id}" value="4">
+                        <span th:text="${q.option4}"></span>
+                    </label>
+                </div>
+            </div>
+
+            <p th:if="${#lists.isEmpty(questions)}">No questions are available for this exam yet.</p>
+
+            <div th:unless="${#lists.isEmpty(questions)}" class="exam-nav-row">
+                <button type="button" id="prevBtn" class="btn-ghost">Previous</button>
+                <button type="button" id="nextBtn">Next</button>
+                <button type="submit" id="submitBtn" style="display:none;">Submit Exam</button>
+            </div>
+        </form>
+
+        <aside class="exam-palette" th:unless="${#lists.isEmpty(questions)}">
+            <h2>Questions</h2>
+            <div id="paletteGrid" class="palette-grid">
+                <button type="button" th:each="q, iter : ${questions}" class="palette-btn"
+                        th:text="${iter.count}" th:attr="data-target=${iter.count}"></button>
+            </div>
+            <div class="palette-legend">
+                <span><i class="answered"></i>Answered</span>
+                <span><i class="unanswered"></i>Not answered</span>
+                <span><i class="current"></i>Current question</span>
+            </div>
+            <div class="exam-progress-track"><div id="progressFill" class="exam-progress-fill"></div></div>
+            <p id="progressLabel" class="exam-progress-label">0 / <span th:text="${#lists.size(questions)}"></span> answered</p>
+        </aside>
+    </div>
+
+    <script th:inline="javascript">
+        (function () {
+            // ---- Countdown timer ----
+            const timerEl = document.getElementById('timer');
+            const deadlineStr = timerEl.getAttribute('data-deadline');
+            const examForm = document.getElementById('examForm');
+
+            function tick() {
+                if (!deadlineStr) return;
+                const remainingMs = new Date(deadlineStr).getTime() - Date.now();
+                if (remainingMs <= 0) {
+                    timerEl.textContent = "Time's up";
+                    examForm.submit();
+                    return;
+                }
+                const totalSeconds = Math.floor(remainingMs / 1000);
+                const m = Math.floor(totalSeconds / 60);
+                const s = totalSeconds % 60;
+                timerEl.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                if (totalSeconds <= 60) timerEl.classList.add('timer-warning');
+                setTimeout(tick, 1000);
+            }
+            tick();
+
+            // ---- Question navigation ----
+            const cards = Array.from(document.querySelectorAll('.qcard'));
+            const paletteBtns = Array.from(document.querySelectorAll('.palette-btn'));
+            const total = cards.length;
+            let current = 1;
+
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const progressFill = document.getElementById('progressFill');
+            const progressLabel = document.getElementById('progressLabel');
+
+            function isAnswered(n) {
+                const card = document.getElementById('q-' + n);
+                return card ? card.querySelector('input[type="radio"]:checked') !== null : false;
+            }
+
+            function renderPalette() {
+                let answeredCount = 0;
+                paletteBtns.forEach(function (btn, i) {
+                    const n = i + 1;
+                    const answered = isAnswered(n);
+                    if (answered) answeredCount++;
+                    btn.classList.toggle('is-answered', answered);
+                    btn.classList.toggle('is-current', n === current);
+                });
+                const pct = total ? Math.round((answeredCount / total) * 100) : 0;
+                progressFill.style.width = pct + '%';
+                progressLabel.textContent = answeredCount + ' / ' + total + ' answered';
+            }
+
+            function showQuestion(n) {
+                if (n < 1 || n > total) return;
+                cards.forEach(function (card, i) {
+                    card.style.display = (i + 1 === n) ? '' : 'none';
+                });
+                current = n;
+                prevBtn.style.visibility = (n === 1) ? 'hidden' : 'visible';
+                const isLast = (n === total);
+                nextBtn.style.display = isLast ? 'none' : 'inline-flex';
+                submitBtn.style.display = isLast ? 'inline-flex' : 'none';
+                renderPalette();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            prevBtn.addEventListener('click', function () { showQuestion(current - 1); });
+            nextBtn.addEventListener('click', function () { showQuestion(current + 1); });
+            paletteBtns.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    showQuestion(parseInt(btn.getAttribute('data-target'), 10));
+                });
+            });
+            examForm.addEventListener('change', renderPalette);
+
+            showQuestion(1);
+        })();
+    </script>
+</body>
+</html>

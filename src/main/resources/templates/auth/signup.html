@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign Up — Exam System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="auth-shell">
+        <aside class="auth-brand">
+            <div class="auth-brand-mark"><span class="mark">EX</span> Exam System</div>
+            <div class="auth-brand-copy">
+                <h1>One account, built for your role from day one.</h1>
+                <p>Students land on a dashboard of their class exams. Teachers get a question bank and exam scheduler. An admin approves every account before it's active.</p>
+            </div>
+            <div class="auth-brand-stats">
+                <div><span class="mono">Free</span><label>To join</label></div>
+                <div><span class="mono">1</span><label>Approval step</label></div>
+            </div>
+        </aside>
+        <div class="auth-panel">
+            <div class="auth-card">
+                <h1>Create your account</h1>
+                <p class="auth-lede">An admin approves new accounts before you can log in.</p>
+                <p th:if="${error}" class="error-msg" th:text="${error}"></p>
+
+                <form th:action="@{/signup}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <label>Full Name</label>
+                    <input type="text" name="name" required autofocus>
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                    <label>Password</label>
+                    <input type="password" name="password" required minlength="6">
+                    <label>I am a</label>
+                    <select name="role" id="roleSelect" required>
+                        <option value="STUDENT">Student</option>
+                        <option value="TEACHER">Teacher</option>
+                    </select>
+
+                    <div id="classField">
+                        <label>Class</label>
+                        <select name="classId" id="classSelect">
+                            <option value="">Select your class</option>
+                            <option th:each="c : ${classes}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+
+                    <button type="submit">Sign Up</button>
+                </form>
+                <p class="switch-link">Already have an account? <a th:href="@{/login}">Log in</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const roleSelect = document.getElementById('roleSelect');
+        const classField = document.getElementById('classField');
+        const classSelect = document.getElementById('classSelect');
+
+        function toggleClassField() {
+            if (roleSelect.value === 'STUDENT') {
+                classField.style.display = 'block';
+                classSelect.required = true;
+            } else {
+                classField.style.display = 'none';
+                classSelect.required = false;
+                classSelect.value = '';
+            }
+        }
+
+        roleSelect.addEventListener('change', toggleClassField);
+        toggleClassField();
+    </script>
+</body>
+</html>

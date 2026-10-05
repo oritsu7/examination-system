@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="dashboard-body">
+    <div th:replace="~{fragments/navbar :: navbar('Teacher Dashboard')}"></div>
+    <main class="dashboard-content">
+        <div class="page-header">
+            <div>
+                <h1>Your subjects</h1>
+                <p>Pick a subject to manage its chapters, question bank, and exams.</p>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(subjects)}" class="empty-state">
+            <div class="empty-glyph mono">—</div>
+            <strong>No subjects assigned yet</strong>
+            <p>Ask your admin to assign a subject to your account — it'll show up here.</p>
+        </div>
+
+        <table th:unless="${#lists.isEmpty(subjects)}">
+            <thead><tr><th>Subject</th><th>Class</th><th></th></tr></thead>
+            <tbody>
+                <tr th:each="s : ${subjects}">
+                    <td data-label="Subject" th:text="${s.name}"></td>
+                    <td data-label="Class" th:text="${s.schoolClass.name}"></td>
+                    <td data-label=""><a th:href="@{/teacher/subjects/{id}/chapters(id=${s.id})}" class="admin-nav-link">Manage Chapters & Questions</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Questions</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="dashboard-body">
+    <div th:replace="~{fragments/navbar :: navbar('Questions')}"></div>
+    <main class="dashboard-content">
+        <div class="page-header">
+            <div>
+                <h1>Questions</h1>
+                <p>Add MCQs to this chapter. Exams randomly pull from the chapters a teacher selects.</p>
+            </div>
+        </div>
+
+        <form th:action="@{/teacher/chapters/{id}/questions(id=${chapterId})}" method="post" class="question-form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <label>Question</label>
+            <input type="text" name="text" required>
+            <label>Option 1</label>
+            <input type="text" name="option1" required>
+            <label>Option 2</label>
+            <input type="text" name="option2" required>
+            <label>Option 3</label>
+            <input type="text" name="option3" required>
+            <label>Option 4</label>
+            <input type="text" name="option4" required>
+            <label>Correct Option (1-4)</label>
+            <input type="number" name="correctOption" min="1" max="4" required>
+            <button type="submit">Add Question</button>
+        </form>
+
+        <div th:if="${#lists.isEmpty(questions)}" class="empty-state">
+            <div class="empty-glyph mono">—</div>
+            <strong>No questions yet</strong>
+            <p>Add your first question above — you'll need enough questions across chapters to cover any exam's question count.</p>
+        </div>
+
+        <table th:unless="${#lists.isEmpty(questions)}">
+            <thead><tr><th>ID</th><th>Question</th><th>Correct</th><th></th></tr></thead>
+            <tbody>
+                <tr th:each="q : ${questions}">
+                    <td data-label="ID" class="mono" th:text="${q.id}"></td>
+                    <td data-label="Question" th:text="${q.text}"></td>
+                    <td data-label="Correct" class="mono" th:text="${q.correctOption}"></td>
+                    <td data-label="">
+                        <form th:action="@{/teacher/questions/{id}/delete(id=${q.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <input type="hidden" name="chapterId" th:value="${chapterId}"/>
+                            <button type="submit" class="delete-btn">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

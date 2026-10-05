@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Exam Unavailable</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="dashboard-body">
+    <div th:replace="~{fragments/navbar :: navbar('Exam Unavailable')}"></div>
+    <main class="dashboard-content" style="max-width:560px;">
+        <div class="empty-state">
+            <div class="empty-glyph mono">!</div>
+            <strong>Can't open this exam</strong>
+            <p th:text="${error}"></p>
+        </div>
+        <div style="text-align:center; margin-top:1.5rem;">
+            <a th:href="@{/student}" class="admin-nav-link">Back to Dashboard</a>
+        </div>
+    </main>
+</body>
+</html>
